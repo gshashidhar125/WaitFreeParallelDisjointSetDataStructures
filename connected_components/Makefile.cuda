@@ -1,0 +1,26 @@
+# DEFS=-DCUDA_IMPL
+# CFLAGS = -g $(DEFS) -O3 
+# CXXFLAGS = -g -G -arch=sm_20 $(DEFS) -O3 -I.  -I../
+# CXX=nvcc
+ADDN_DEFS=
+
+objects = dowork.o main.o CudaPrintResults.o alternate_parallel_uf.o
+
+test : dowork.o main.o  alternate_parallel_uf.o  CudaPrintResults.o
+	nvcc $(ADDN_DEFS) -g -G -o $@ $(objects) -arch=sm_20
+
+dowork.o: dowork.cu cuda_parallel_uf.cu 
+	nvcc $(ADDN_DEFS) -DCUDA_IMPL -g -G -c -o $@ dowork.cu -arch=sm_20 -I../
+
+CudaPrintResults.o: CudaPrintResults.cpp
+	g++ $(ADDN_DEFS) -c CudaPrintResults.cpp -I../
+
+alternate_parallel_uf.o: alternate_parallel_uf.cpp
+	g++ $(ADDN_DEFS) -c alternate_parallel_uf.cpp -I../
+
+main.o: main.cpp cuda_parallel_uf.cu
+	nvcc $(ADDN_DEFS) -DCUDA_IMPL -g -G -c -o $@ main.cpp -arch=sm_20 -I../
+
+clean :
+	rm -f test $(objects) 
+
